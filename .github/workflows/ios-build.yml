@@ -1,0 +1,52 @@
+name: Build iOS app (unsigned IPA)
+
+# Builds the Vibe iOS casing on GitHub's macOS machines (the only thing a
+# Windows PC can't do itself). Output: Vibe-unsigned.ipa artifact — sign and
+# install onto an iPhone from Windows with Sideloadly over USB.
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+
+jobs:
+  build-ipa:
+    runs-on: macos-15
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Install Capacitor deps
+        run: npm ci
+
+      - name: Sync iOS project
+        run: npx cap sync ios
+
+      - name: Build unsigned archive (SPM project — no workspace)
+        run: |
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath build/App.xcarchive \
+            archive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+      - name: Package IPA
+        run: |
+          mkdir -p build/Payload
+          cp -R build/App.xcarchive/Products/Applications/App.app build/Payload/
+          cd build && zip -qry Vibe-unsigned.ipa Payload
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Vibe-unsigned-ipa
+          path: build/Vibe-unsigned.ipa
+          retention-days: 30

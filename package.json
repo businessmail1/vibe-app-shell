@@ -1,0 +1,18 @@
+{
+  "name": "vibe-native",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Native iOS/Android casing for Vibe (webview onto the live site)",
+  "scripts": {
+    "sync": "cap sync"
+  },
+  "dependencies": {
+    "@capacitor/app": "^8.1.1",
+    "@capacitor/cli": "^8.5.0",
+    "@capacitor/core": "^8.5.0",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/ios": "^8.5.0",
+    "@capacitor/keyboard": "^8.0.5",
+    "@capacitor/status-bar": "^8.0.3"
+  }
+}

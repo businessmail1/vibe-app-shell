@@ -1,0 +1,20 @@
+{
+  "appId": "uk.co.moonwebsites.vibe",
+  "appName": "Vibe",
+  "webDir": "www",
+  "server": {
+    "url": "https://vibe.moonwebsites.co.uk",
+    "allowNavigation": ["vibe.moonwebsites.co.uk", "vibe-gw.moonwebsites.co.uk"]
+  },
+  "backgroundColor": "#09090b",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#09090b",
+    "allowsLinkPreview": false,
+    "scrollEnabled": true
+  },
+  "plugins": {
+    "Keyboard": { "resize": "native" },
+    "StatusBar": { "style": "DARK", "overlaysWebView": true }
+  }
+}
