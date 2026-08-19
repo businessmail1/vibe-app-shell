@@ -4,17 +4,27 @@
   "webDir": "www",
   "server": {
     "url": "https://vibe.moonwebsites.co.uk",
-    "allowNavigation": ["vibe.moonwebsites.co.uk", "vibe-gw.moonwebsites.co.uk"]
+    "allowNavigation": [
+      "vibe.moonwebsites.co.uk",
+      "vibe-gw.moonwebsites.co.uk"
+    ]
   },
   "backgroundColor": "#09090b",
   "ios": {
     "contentInset": "never",
     "backgroundColor": "#09090b",
     "allowsLinkPreview": false,
-    "scrollEnabled": true
+    "scrollEnabled": true,
+    "limitsNavigationsToAppBoundDomains": false,
+    "allowsBackForwardNavigationGestures": false
   },
   "plugins": {
-    "Keyboard": { "resize": "native" },
-    "StatusBar": { "style": "DARK", "overlaysWebView": true }
+    "Keyboard": {
+      "resize": "native"
+    },
+    "StatusBar": {
+      "style": "DARK",
+      "overlaysWebView": true
+    }
   }
 }
