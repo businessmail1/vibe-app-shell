@@ -1,0 +1,34 @@
+# Codemagic build config — Codemagic reads this automatically when the repo
+# is connected. Produces an UNSIGNED Vibe.ipa to sideload from Windows with
+# Sideloadly. Free tier includes macOS minutes, no card needed.
+workflows:
+  ios-unsigned:
+    name: Vibe iOS (unsigned IPA)
+    instance_type: mac_mini_m2
+    max_build_duration: 30
+    environment:
+      node: 22
+    scripts:
+      - name: Install Capacitor deps
+        script: npm ci
+      - name: Sync iOS project
+        script: npx cap sync ios
+      - name: Build unsigned archive
+        script: |
+          xcodebuild \
+            -project ios/App/App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -sdk iphoneos \
+            -archivePath build/App.xcarchive \
+            archive \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+      - name: Package IPA
+        script: |
+          mkdir -p build/Payload
+          cp -R build/App.xcarchive/Products/Applications/App.app build/Payload/
+          cd build && zip -qry Vibe-unsigned.ipa Payload
+    artifacts:
+      - build/Vibe-unsigned.ipa
