@@ -67,8 +67,7 @@ public class PhotoLibraryPlugin: CAPPlugin, CAPBridgedPlugin {
             "cover": all.firstObject.map { thumbnail(for: $0, size: 200) } as Any,
         ])
 
-        let collections = PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: nil)
-        collections.enumerateObjects { collection, _, _ in
+        func add(_ collection: PHAssetCollection) {
             let assets = PHAsset.fetchAssets(in: collection, options: self.fetchOptions(nil))
             guard assets.count > 0 else { return }
             albums.append([
@@ -78,6 +77,19 @@ public class PhotoLibraryPlugin: CAPPlugin, CAPBridgedPlugin {
                 "cover": assets.firstObject.map { self.thumbnail(for: $0, size: 200) } as Any,
             ])
         }
+
+        // The categories people actually look for, in the Photos app's order.
+        let smartTypes: [PHAssetCollectionSubtype] = [
+            .smartAlbumFavorites, .smartAlbumVideos, .smartAlbumSelfPortraits,
+            .smartAlbumScreenshots, .smartAlbumLivePhotos, .smartAlbumPanoramas,
+            .smartAlbumBursts, .smartAlbumSlomoVideos, .smartAlbumTimelapses,
+        ]
+        for subtype in smartTypes {
+            PHAssetCollection.fetchAssetCollections(with: .smartAlbum, subtype: subtype, options: nil)
+                .enumerateObjects { collection, _, _ in add(collection) }
+        }
+        PHAssetCollection.fetchAssetCollections(with: .album, subtype: .any, options: nil)
+            .enumerateObjects { collection, _, _ in add(collection) }
         call.resolve(["albums": albums])
     }
 
@@ -137,7 +149,13 @@ public class PhotoLibraryPlugin: CAPPlugin, CAPBridgedPlugin {
                 session.outputFileType = .mp4
                 session.exportAsynchronously {
                     if session.status == .completed {
-                        call.resolve(["path": out.path, "isVideo": true, "mime": "video/mp4"])
+                        let bytes = (try? Data(contentsOf: out)) ?? Data()
+                    call.resolve([
+                        "data": bytes.base64EncodedString(),
+                        "isVideo": true,
+                        "mime": "video/mp4",
+                    ])
+                    try? FileManager.default.removeItem(at: out)
                     } else {
                         call.reject("export_failed")
                     }
@@ -159,7 +177,13 @@ public class PhotoLibraryPlugin: CAPPlugin, CAPBridgedPlugin {
                     } else {
                         try data.write(to: out)
                     }
-                    call.resolve(["path": out.path, "isVideo": false, "mime": "image/jpeg"])
+                    let bytes = (try? Data(contentsOf: out)) ?? Data()
+                    call.resolve([
+                        "data": bytes.base64EncodedString(),
+                        "isVideo": false,
+                        "mime": "image/jpeg",
+                    ])
+                    try? FileManager.default.removeItem(at: out)
                 } catch {
                     call.reject("write_failed")
                 }
